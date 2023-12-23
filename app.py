@@ -20,7 +20,6 @@ Base: DeclarativeMeta = declarative_base()
 # Create FastAPI app
 app = FastAPI(debug=True)
 
-# Вспомогательная функция для получения сессии базы данных
 def get_db():
     db = SessionLocal()
     try:
@@ -35,6 +34,7 @@ def create_bandit(bandit: BandCreate, db: Session = Depends(get_db)):
     db.add(db_band)
     db.commit()
     db.refresh(db_band)
+
     return db_band
 
 # Эндпоинт для получения информации о бандите по ID
@@ -45,6 +45,11 @@ def read_bandit(bandit_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Bandit not found")
     return bandit
 
+@app.get("/bandits/", response_model=List[BandResponse])
+def list_bandits(skip: int = 0, limit: int = 10, db: Session = Depends(get_db)):
+    bandits = db.query(Band).offset(skip).limit(limit).all()
+    return bandits
+
 # Эндпоинт для создания нового банка
 @app.post("/banks/", response_model=BankResponse)
 def create_bank(bank: BankCreate, db: Session = Depends(get_db)):
@@ -52,6 +57,7 @@ def create_bank(bank: BankCreate, db: Session = Depends(get_db)):
     db.add(db_bank)
     db.commit()
     db.refresh(db_bank)
+
     return db_bank
 
 # Эндпоинт для получения информации о банке по ID
@@ -61,6 +67,11 @@ def read_bank(bank_id: int, db: Session = Depends(get_db)):
     if bank is None:
         raise HTTPException(status_code=404, detail="Bank not found")
     return bank
+
+@app.get("/banks/", response_model=List[BankResponse])
+def list_banks(skip: int = 0, limit: int = 10, db: Session = Depends(get_db)):
+    banks = db.query(Bank).offset(skip).limit(limit).all()
+    return banks
 
 # Эндпоинт для создания нового ограбления
 @app.post("/robberies/", response_model=RobberyResponse)
@@ -78,3 +89,8 @@ def read_robbery(robbery_id: int, db: Session = Depends(get_db)):
     if robbery is None:
         raise HTTPException(status_code=404, detail="Robbery not found")
     return robbery
+
+@app.get("/robberies/", response_model=List[RobberyResponse])
+def list_robberies(skip: int = 0, limit: int = 10, db: Session = Depends(get_db)):
+    robberies = db.query(Robbery).offset(skip).limit(limit).all()
+    return robberies
