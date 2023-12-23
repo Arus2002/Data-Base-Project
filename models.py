@@ -5,20 +5,20 @@ from sqlalchemy_utils import database_exists, create_database
 Base = declarative_base()
 
 class Band(Base):
-    __tablename__ = 'band'
+    __tablename__ = 'Band'
 
-    band_id = Column("band_id", Integer, primary_key=True)
-    specialization = Column("specialization", String)
-    level = Column("level", Integer)
-    status = Column("status", String)
-    nickname = Column("nickname", String)
-    contact = Column("contact", String)
-    date = Column("date", Date)
+    band_id = Column(Integer, primary_key=True, index=True)
+    specialization = Column(String)
+    level = Column(Integer)
+    status = Column(String)
+    nickname = Column(String)
+    contact = Column(String)
+    date = Column(Date)
 
-    robbery = relationship('Robbery', back_populates='Band')
+    robbery = relationship('Robbery', back_populates='band', cascade="all, delete-orphan")
 
 class Robbery(Base):
-    __tablename__ = "robbery"
+    __tablename__ = "Robbery"
 
     robbery_id = Column("robbery_id", Integer, primary_key=True)
     total_sum_for_each = Column("sum", Integer)
@@ -26,12 +26,14 @@ class Robbery(Base):
     date = Column("date", Date)
     mark = Column("mark", Integer)
 
-    band_id = Column(Integer, ForeignKey('band.band_id'), nullable=False)
-    band = relationship('Band', back_populates='Robbery')
-    bank = relationship('Bank', back_populates='Robbery')
+    band_id = Column(Integer, ForeignKey('Band.band_id'), nullable=False)
+    bank_id = Column(Integer, ForeignKey('Bank.bank_id'), nullable=False)
+
+    band = relationship('Band', back_populates='robbery')
+    bank = relationship('Bank', back_populates='robbery')
 
 class Bank(Base):
-    __tablename__ = "bank"
+    __tablename__ = "Bank"
 
     bank_id = Column("bank_id", Integer, primary_key=True)
     rate = Column("rate", Integer)
@@ -40,15 +42,11 @@ class Bank(Base):
     security_rate = Column("security_rate", Integer)
     name = Column("name", String)
 
-    robbery = relationship('Robbery', back_populates='Bank')
+    robbery = relationship('Robbery', back_populates='bank', cascade="all, delete-orphan")
 
 
-def initialize_db():
-    DATABASE_URL = f'postgresql://arusyak:pass123@localhost:5432/my_project'
-    engine = create_engine(DATABASE_URL)
+DATABASE_URL = f'postgresql://arusyak:pass123@localhost:5432/my_project'
+engine = create_engine(DATABASE_URL, echo=True)
 
-    Base.metadata.create_all(engine)
-
-if __name__ == "__main__":
-    initialize_db()
+Base.metadata.create_all(engine)
 
