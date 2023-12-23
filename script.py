@@ -17,7 +17,6 @@ def create_bandit():
         "status": random.choice(["good", "bad"]),
         "nickname": fake.user_name(),
         "contact": fake.email(),
-        "date": str(fake.date_this_decade()),
     }
     response = requests.post(url, json=data)
     print(response.content)
@@ -42,7 +41,6 @@ def create_robbery():
     data = {
         "total_sum_for_each": random.randint(1000, 10000),
         "part": random.randint(1, 5),
-        "date": str(fake.date_this_decade()),
         "mark": random.randint(1, 100),
         "band_id": random.randint(1, 500),  
         "bank_id": random.randint(1, 500),
@@ -51,12 +49,12 @@ def create_robbery():
     return response.json()
 
 # Create a large number of bandits, banks, and robberies
-for _ in range(500):
+for _ in range(50):
     create_bandit()
 
-for _ in range(500):
+for _ in range(50):
     create_bank()
 
-for _ in range(500):
+for _ in range(50):
     create_robbery()
 
