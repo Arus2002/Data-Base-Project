@@ -13,7 +13,6 @@ class Band(Base):
     status = Column(String)
     nickname = Column(String)
     contact = Column(String)
-    date = Column(Date)
 
     robbery = relationship('Robbery', back_populates='band', cascade="all, delete-orphan")
 
@@ -23,7 +22,6 @@ class Robbery(Base):
     robbery_id = Column("robbery_id", Integer, primary_key=True)
     total_sum_for_each = Column("sum", Integer)
     part = Column("part", Integer)
-    date = Column("date", Date)
     mark = Column("mark", Integer)
 
     band_id = Column(Integer, ForeignKey('Band.band_id'), nullable=False)
@@ -38,7 +36,7 @@ class Bank(Base):
     bank_id = Column("bank_id", Integer, primary_key=True)
     rate = Column("rate", Integer)
     total_sum = Column("total_sum", Integer)
-    addres = Column("addres", String)
+    address = Column("addres", String)
     security_rate = Column("security_rate", Integer)
     name = Column("name", String)
 
