@@ -26,7 +26,7 @@ class BankResponse(BankCreate):
 class RobberyCreate(BaseModel):
     total_sum_for_each: int
     part: int
-    date: datetime
+    date: str
     mark: int
     band_id: int
     bank_id: int
