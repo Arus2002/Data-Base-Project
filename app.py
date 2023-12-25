@@ -94,3 +94,44 @@ def read_robbery(robbery_id: int, db: Session = Depends(get_db)):
 def list_robberies(skip: int = 0, limit: int = 10, db: Session = Depends(get_db)):
     robberies = db.query(Robbery).offset(skip).limit(limit).all()
     return robberies
+
+# 1. SELECT ... WHERE (с несколькими условиями)
+@app.get("/bands/filter/", response_model=List[BandResponse])
+def filter_bands(specialization: str, level: int, status: str, db: Session = Depends(get_db)):
+    bands = db.query(Band).filter(
+        Band.specialization == specialization,
+        Band.level == level,
+        Band.status == status
+    ).all()
+    return bands
+
+# 2. JOIN
+@app.get("/robberies/join/", response_model=List[RobberyResponse])
+def get_robberies_with_banks(db: Session = Depends(get_db)):
+    robberies = db.query(Robbery).join(Bank).all()
+    return robberies
+
+# 3. UPDATE с нетривиальным условием
+@app.put("/update-robbery-mark/", response_model=RobberyResponse)
+def update_robbery_mark(robbery_id: int, new_mark: int, db: Session = Depends(get_db)):
+    robbery = db.query(Robbery).filter(Robbery.robbery_id == robbery_id).first()
+    if not robbery:
+        raise HTTPException(status_code=404, detail="Robbery not found")
+    robbery.mark = new_mark
+    db.commit()
+    db.refresh(robbery)
+    return robbery
+
+# 4. GROUP BY
+@app.get("/banks/group-by/", response_model=List[dict])
+def count_robberies_by_bank(db: Session = Depends(get_db)):
+    result = db.query(Robbery.bank_id, func.count(Robbery.robbery_id)).group_by(Robbery.bank_id).all()
+    return [{"bank_id": bank_id, "robbery_count": count} for bank_id, count in result]
+
+# 5. Добавить сортировку выдачи результатов по какому-то из полей
+@app.get("/bands/sorted/", response_model=List[BandResponse])
+def list_sorted_bands(sort_by: str, db: Session = Depends(get_db)):
+    if not hasattr(Band, sort_by):
+        raise HTTPException(status_code=400, detail="Invalid sort field")
+    bands = db.query(Band).order_by(getattr(Band, sort_by)).all()
+    return bands
